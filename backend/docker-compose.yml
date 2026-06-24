@@ -1,0 +1,56 @@
+"""
+Docker Compose file for CricAuction backend services
+"""
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: cricsauction-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: cricsauction
+      MYSQL_USER: cric_user
+      MYSQL_PASSWORD: cric_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - cricsauction
+
+  redis:
+    image: redis:7-alpine
+    container_name: cricsauction-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - cricsauction
+
+  api:
+    build: .
+    container_name: cricsauction-api
+    environment:
+      DATABASE_URL: mysql+pymysql://cric_user:cric_password@mysql:3306/cricsauction
+      REDIS_URL: redis://redis:6379
+      DEBUG: "false"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+      - redis
+    volumes:
+      - .:/app
+    networks:
+      - cricsauction
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  cricsauction:
+    driver: bridge
