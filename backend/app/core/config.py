@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     DEBUG: bool = False
+    FRONTEND_URL: str = "http://localhost:3000"
     
     # Email
     SMTP_HOST: str = "smtp.gmail.com"
